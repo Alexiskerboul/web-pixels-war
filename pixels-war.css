@@ -11,13 +11,14 @@ body {
     /* TODO à récupérer sur le serveur */
     /* et modifier depuis le JS
     /* car toutes les cartes ne sont pas forcément en 10x10 ! */
-    grid-template-columns: repeat(10, 4px);
-    grid-template-rows: repeat(10, 4px);
+    grid-template-columns: repeat(10, 20px);
+    grid-template-rows: repeat(10, 20px);
 
     &>div {
-        width: 4px;
-        height: 4px;
+        width: 20px;
+        height: 20px;
         margin: 0px;
+        background-color: #d8d8d8;
     }
 }
 

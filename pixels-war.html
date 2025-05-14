@@ -1,100 +1,33 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pixel War</title>
+    <title>Pixel War ue22-p23</title>
     <link rel="stylesheet" href="./pixels-war.css" />
     <script src="./pixels-war.js" defer></script>
-    <style>
-        .container{
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-        }
-        .map{
-            display : grid;
-            grid-template-rows: repeat(3, 10px);
-            grid-template-columns: repeat(3, 10px);
-        }
-        .pixel{
-            width: 10px;
-            height: 10px;
-            border: 1px solid black
-        }
-    </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class = "header">
-            <input type="text" name="adresse" id="adresse" value="https://pixels-war.oie-lab.net">
-            <input type="text" name="map" id="map" value="TEST">
-        </div>
-        <div class="map" id="map-container">
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-            <div class="pixel"></div>
-        </div>
-        <div class="footer">
-            <input type="color" name="couleur" id="couleur" value="#0000FF">
-        </div>
+    <div id="connect-dialog">
+        <span>
+            <label for="baseurl">url:</label>
+            <input id="baseurl" type="text">
+        </span>
+        <span>
+            <label for="mapid">map:</label>
+            <input id="mapid" type="text" value="0000">
+        </span>
+        <!-- <button type="submit">Connect</button> -->
     </div>
-    <script>
-        const adresse = document.querySelector("#adresse").value;
-        const carte = document.querySelector("#carte").value;
-        const couleur = document.querySelector("#couleur").value;
-        console.log({adresse, carte, couleur})
 
-        const mapElement = document.querySelector("#map-container") 
-
-        async function preinit() {
-            const res = await fetch(`${adresse}/api/v1/${carte}/preinit`, {credentials:"include"});
-            const {key} = await res.json();
-            init(key)
-        }
-
-        async function init(key) {
-            const res = await fetch(`${adresse}/api/v1/${carte}/init?key=${key}`, {credentials:"include"});
-            const {id, nx, ny, timeout, data} = await res.json();
-            
-            let contenu="";
-            for (let col = 0; col < nx; col++){
-                for (let li = 0; li < ny; li++){
-                    const [r, g, b] = data[li][col]
-                    contenu += `<div class="pixel" id = "l${li}_c${col}" style="background-color: rgb(${r}, ${g}, ${b})"></div>`
-                }
-            }
-            mapElement.innerHTML = contenu
-            mapElement.style.gridTemplateRow = `repeat(${ny}, 10px)`;
-            mapElement.style.gridTemplateColumns = `repeat(${nx}, 10px)`;
-            console.log(contenu);
-
-            setInterval(() => delta(id), 1000);
-        }
-
-        async function delta(id) {
-            const res = await fetch(`${adresse}/api/v1/${carte}/preinit`, {credentials:"include"});
-            const {delta} = await res.json();
-            for (const[x, y, r, g, b] of delta){
-                console.log("delta", [x, y, r, g, b]);
-                const pixel = document.querySelector(`#l${y}_l${x}`);
-                pixel.style.backgroundColor = `rgb(${g}, ${b})`;
-            }
-            
-        }
-
-        preinit()
-    </script>
+    <div id="grid">
+    </div>
+    <div id="controls">
+        <label for="colorpicker">Couleur :</label>
+        <input id="colorpicker" type="color" value="#000000" title="Choisis ta couleur">
+        <button type="button" class="btn btn-primary" id="refresh">Rafraîchir</button>
+    </div>
 </body>
