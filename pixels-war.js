@@ -22,19 +22,29 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch(`${PREFIX}/preinit`, {credentials: "include"})
         .then((response) => response.json())
         .then((json) => {
-            console.log(json)
-            //TODO: maintenant que j'ai le json de preinit, je peux initialiser ma grille
-
-            //TODO: maintenant que j'ai le JSON, afficher la grille, et récupérer l'id
-
-            //TODO: maintenant que j'ai l'id, attacher la fonction refresh(id), à compléter, au clic du bouton refresh
-
-            //TODO: attacher au clic de chaque pixel une fonction qui demande au serveur de colorer le pixel sous là forme :
-            // http://pixels-war.oie-lab.net/api/v1/0000/set/id/x/y/r/g/b
-            // la fonction getPickedColorInRGB ci-dessous peut aider
-
-            //TODO: pourquoi pas rafraichir la grille toutes les 3 sec ?
-            // voire même rafraichir la grille après avoir cliqué sur un pixel ?
+            //console.log(json)
+            let key = json.key
+            fetch(PREFIX+'/init?key='+key, {credentials: "include"})
+                .then((response) => response.json())
+                .then((json) => {
+                    let id = json.id;
+                    let nx = json.nx;
+                    let ny = json.ny;
+                    let data = json.data;
+                    //console.log(data);
+                    document.getElementById("grid").style.gridTemplateColumns = `repeat(${nx}, 20px)`;
+                    document.getElementById("grid").style.gridTemplateRows = `repeat(${ny}, 20px)`;
+                    for (let i = 0; i < nx; i++) {
+                        for (let j = 0; j < ny; j++) {
+                            element = document.createElement("div");
+                            element.id = `${i}-${j}`;
+                            element.addEventListener("click", (e) => changemementColor(id,e,i,j));
+                            element.style.backgroundColor = `rgb(${data[i][j][0]}, ${data[i][j][1]}, ${data[i][j][2]})`;
+                            document.getElementById("grid").appendChild(element);}}
+                    document.getElementById("refresh").addEventListener("click", () => {refresh(id);});
+                    setInterval(refresh(id), 3000)
+    
+                })
 
             // cosmétique / commodité / bonus:
 
@@ -52,14 +62,26 @@ document.addEventListener("DOMContentLoaded", () => {
     //TODO: pour les élèves avancés, comment transformer les "then" ci-dessus en "async / await" ?
     //TODO: pour les élèves avancés, faire en sorte qu'on puisse changer de carte
     //      voir le bouton Connect dans le HTML
+    
+    function changemementColor (user_id,e,x,y){
+        const [r, g, b] = getPickedColorInRGB()
+        //console.log(x,y,r,g,b);
+        fetch(PREFIX+'/set/'+user_id.toString()+'/'+x+'/'+y+'/'+r.toString()+'/'+g.toString()+'/'+b.toString(), {credentials: "include"})
+                .then((response) => response.json())
+                //.then((json) => {refresh(user_id);})
+    }
 
-    // À compléter puis à attacher au bouton refresh en passant mon id une fois récupéré
     function refresh(user_id) {
         fetch(`${PREFIX}/deltas?id=${user_id}`, {credentials: "include"})
             .then((response) => response.json())
             .then((json) => {
-                //TODO: maintenant que j'ai le json des deltas, mettre à jour les pixels qui ont changé.
-                // "Here be dragons" : comment récupérer le bon div ?
+                let deltas = json.deltas;
+                //console.log(deltas);
+                for (const pixcol of deltas) {
+                    const pixel = document.getElementById(pixcol[0].toString()+"-"+pixcol[1].toString());
+                    pixel.style.backgroundColor = `rgb(${pixcol[2]}, ${pixcol[3]}, ${pixcol[4]})`;
+                }
+        
 
             })
     }
